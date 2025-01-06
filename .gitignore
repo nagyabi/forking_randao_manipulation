@@ -1,0 +1,15 @@
+__pycache__/
+apikey.json
+headers.txt
+launch.json
+*.pkl
+migrate.py
+dumps/
+cache/
+cache2/
+Figures/
+selfish_mixing/
+logs/
+venv/
+.venv/
+*.har

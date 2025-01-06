@@ -1,0 +1,1 @@
+This folder consists of an almost line by line implementation of the pseudo codes in the article related to building a decision trees. Run graph.py after setting the value of the attack string and alpha.
