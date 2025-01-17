@@ -1,4 +1,4 @@
-Repository for partially evaluating ETH forking RANDAO manipulations.
+This is the official repository for the paper [Forking the RANDAO: Manipulating Ethereum’s Distributed Randomness Beacon](https://eprint.iacr.org/2025/037.pdf). It includes theoretical evaluations of forking RANDAO manipulations and tools for searching anomalies on Ethereum mainnet.
 
 1. Collecting beaconchain information from the internet (https://etherscan.io/, https://beaconscan.com/, https://beaconcha.in/)
 2. Processing collected data looking for potential anomalies (RANDAO manipulations).
@@ -90,5 +90,3 @@ python3 -m main --theory --size-prefix <PREFIX_SIZE> --size-postfix <POSTFIX_SIZ
 ```
 
 To use the model in a different environment, implement a custom agent, that inherits from ``RANDAODataProvider`` (See [this](./theory/method/quant/base.py) file).
-
-WARNING: We strongly advise against using our implemented attack on the Ethereum Mainnet.
