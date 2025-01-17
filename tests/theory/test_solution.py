@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from base.helpers import sac
-from theory.method.detailed_distribution import Action, Move
+from theory.method.detailed_distribution import DetailedSlot, DetailedStatus
 from theory.method.distribution import RichValuedDistribution
 from theory.method.quant.base import (
     RandomRANDAODataProvider,
@@ -51,7 +51,7 @@ def extract_stats(adv_slots: int, before: str, cfg: int) -> np.ndarray:
     return result
 
 
-def check_actions(actions: list[Action], before: str, cfg: int):
+def check_statuses(actions: list[DetailedSlot], before: str, cfg: int):
     assert len(actions) == len(before), f"{actions=} {before=}"
     for i, (c, adv_char, action) in enumerate(
         zip(bin(cfg)[2:].zfill(len(before))[::-1], before, actions)
@@ -59,14 +59,17 @@ def check_actions(actions: list[Action], before: str, cfg: int):
         assert action.slot == -len(before) + i
         if c == "0":
             if adv_char == "h":
-                assert action.move == Move.FORKOUT
+                assert action.status == DetailedStatus.REORGED
             else:
-                assert action.move == Move.MISSBLOCK
+                assert action.status == DetailedStatus.MISSED
         else:
             if adv_char == "h":
-                assert action.move == Move.HONESTPROPOSE
+                assert action.status == DetailedStatus.HONESTPROPOSE
             else:
-                assert action.move in [Move.PROPOSEBLOCK, Move.HIDEBLOCK]
+                assert action.status in [
+                    DetailedStatus.PROPOSED,
+                    DetailedStatus.PRIVATE,
+                ]
 
 
 arguments = [
@@ -128,6 +131,7 @@ def test_solution_quant_consistency_with_markov_chain(
             eas_to_quantized_eas=eas_to_quant,
             mapping_by_eas_postf=mapping_by_eas_postf,
             eas_mapping=eas_mapping,
+            alpha=alpha,
         )
 
         # TESTING THAT THE GIVEN EASS RETURNS CLOSE STATISTICS WHEN QUANTIZED + SIMULATED TO RICH DISTS RESULTS
@@ -144,7 +148,7 @@ def test_solution_quant_consistency_with_markov_chain(
                 )
 
                 cfg = runner.run_one_epoch(eas=eas, provider=provider)
-                check_actions(runner.captured_actions, before, cfg)
+                check_statuses(runner.captured_statuses, before, cfg)
 
                 adv_slots, _ = provider.provide(cfg)
                 simulated_stats.append(extract_stats(adv_slots, before, cfg))
@@ -176,7 +180,7 @@ def test_solution_quant_consistency_with_markov_chain(
                 cfg = 0
             else:
                 cfg = runner.run_one_epoch(eas=eas, provider=provider)
-                check_actions(runner.captured_actions, before, cfg)
+                check_statuses(runner.captured_statuses, before, cfg)
             adv_slots, epoch_string = provider.provide(cfg)
             stats = extract_stats(adv_slots=adv_slots, before=before, cfg=cfg)
             ROs.append(stats[0])

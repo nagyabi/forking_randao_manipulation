@@ -1,3 +1,4 @@
+import gc
 from typing import Generic, Optional
 
 import numpy as np
@@ -34,6 +35,7 @@ class DetailedEvaluator(Generic[T_Detailed_Distribution]):
         known: dict[str, bool],
         eas_mapping: dict[str, str],
         quantizer: Optional[Quantizer] = None,
+        optimize: bool = False,
     ):
         self.maker = maker
         self.known = known
@@ -41,14 +43,16 @@ class DetailedEvaluator(Generic[T_Detailed_Distribution]):
         self.alpha = alpha
         self.size_prefix = size_prefix
         self.size_postfix = size_postfix
+        self.optimize = optimize
 
         self.eass: list[ExtendedAttackString] = ExtendedAttackString.possibilities(
             size_prefix=size_prefix, size_postfix=size_postfix
         )
         ordering = lambda x: (
+            len(x.postfix_epoch_next.postfix),
+            x.postfix_epoch_next.postfix,
             len(x.attack_string.postfix_prev.postfix),
             len(x.attack_string.prefix_next.prefix),
-            len(x.postfix_epoch_next.postfix),
         )
         self.eass = sorted(self.eass, key=ordering)
 
@@ -163,7 +167,10 @@ class DetailedEvaluator(Generic[T_Detailed_Distribution]):
 
                 addit_to_dist[addit] = dist
 
-            no_fork_string = f"{eas.attack_string.postfix_prev.postfix[adv_cluster1 + honest_cluster:]}.{eas.attack_string.prefix_next.prefix}#{eas.postfix_epoch_next.postfix}"
+            before = eas.attack_string.postfix_prev.postfix[
+                adv_cluster1 + honest_cluster :
+            ]
+            no_fork_string = f"{before}.{eas.attack_string.prefix_next.prefix}#{eas.postfix_epoch_next.postfix}"
             no_forking_dist = (
                 self.eas_to_dist[no_fork_string]
                 .expected_value_in_distribution()
@@ -283,11 +290,23 @@ class DetailedEvaluator(Generic[T_Detailed_Distribution]):
                 size_pre=self.size_prefix, size_post=self.size_postfix
             )
         )
-
+        pfix = None
+        batch: set[str] = set()
         for i, eas in enumerate(self.eass):
+            if self.optimize:
+                if pfix != eas.postfix_epoch_next.postfix:
+                    for st in batch:
+                        self.eas_to_dist[st] = self.eas_to_dist[
+                            st
+                        ].expected_value_in_distribution()
+                    gc.collect()  # Forcing garbage collection /each unique postfixes
+                    batch = set()
 
-            evaled = self.eval_eas(eas=eas)
-            self.eas_to_dist[str(eas)] = evaled
+                pfix = eas.postfix_epoch_next.postfix
+                self.eas_to_dist[str(eas)] = self.eval_eas(eas=eas)
+                batch.add(str(eas))
+            else:
+                self.eas_to_dist[str(eas)] = self.eval_eas(eas=eas)
             if (i + 1) % interval == 0:
                 progress_bar.update(interval)
         progress_bar.close()

@@ -1,4 +1,4 @@
-Repository for partially evaluating ETH forking RANDAO manipulations.
+This is the official repository for the paper [Forking the RANDAO: Manipulating Ethereum’s Distributed Randomness Beacon](https://eprint.iacr.org/2025/037.pdf). It includes theoretical evaluations of forking RANDAO manipulations and tools for searching anomalies on Ethereum mainnet.
 
 1. Collecting beaconchain information from the internet (https://etherscan.io/, https://beaconscan.com/, https://beaconcha.in/)
 2. Processing collected data looking for potential anomalies (RANDAO manipulations).
@@ -80,6 +80,19 @@ python3 -m main --statistics --size-postfix <PREFIX_SIZE> --size-prefix <POSTFIX
 
 For computing the theoretical results, use:
 ```bash
-python3 -m main --theory --size-prefix <PREFIX_SIZE> --size-postfix <POSTFIX_SIZE> --alphas <ALPHAS> [--markov-chain] [--quant]
+python3 -m main --theory --size-prefix <PREFIX_SIZE> --size-postfix <POSTFIX_SIZE> --iterations <ITERATIONS> --alphas <ALPHAS> [--markov-chain] [--quant]
 ```
-where you can give <ALPHAS> as a single number or a sequence like ``0.01:0.3:0.02`` (start:stop:step).
+where you can give <ALPHAS> as a single float between 0 and 1 or a sequence like ``0.01:0.3:0.02`` (start:stop:step).
+
+Try the model in different attacking scenarios described by an extended attack string. First, a quantized model is needed, run the above command with the ``--quant`` flag, then run:
+```bash
+python3 -m main --theory --size-prefix <PREFIX_SIZE> --size-postfix <POSTFIX_SIZE> --iterations <ITERATIONS> --alphas <ALPHA> --try-quantized
+```
+
+To use the model in a different environment, implement a custom agent, that inherits from ``RANDAODataProvider`` (See [this](./theory/method/quant/base.py) file).
+
+**Testing**
+
+```bash
+python3 -m pytest tests/
+```

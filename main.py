@@ -5,6 +5,7 @@ import os
 import numpy as np
 
 from theory.method.solution import NewMethodSolver
+from theory.method.quant.run_user_quant import run_quant_model
 from base.helpers import CACHE_FOLDER, SLOTS_PER_EPOCH, read_api_keys
 from base.statistics import index_to_entity_job
 from data.collect.beaconchain_grinder import grind_beaconchain
@@ -207,7 +208,10 @@ def main():
         help="A single float or a comma-separated list of floats which represents the stakes",
     )
     parser.add_argument(
-        "--heur-max", type=int, help="Maximum of tail slot in selfish mixing theory"
+        "--heur-max",
+        type=int,
+        default=SLOTS_PER_EPOCH,
+        help="Maximum of tail slot in selfish mixing theory",
     )
     parser.add_argument(
         "--iterations",
@@ -221,12 +225,17 @@ def main():
         help="When used, only the selfish mixing will be calculated",
     )
     parser.add_argument(
-        "--quant", action="store_true", help="When used, the model is quantized"
+        "--quant", action="store_true", help="When used, a quantized model is produced"
     )
     parser.add_argument(
         "--markov-chain",
         action="store_true",
         help="When used the model is evaluated with rich eval in the end",
+    )
+    parser.add_argument(
+        "--try-quantized",
+        action="store_true",
+        help="Using quantized model with provided parameters",
     )
 
     # Statistics
@@ -368,19 +377,32 @@ def main():
         if args.alphas is None:
             parser.error("--alphas is required when choosing --theory")
         if not args.selfish_mixing:
-            for alpha in args.alphas:
-                print(f"Theoretical calculations for {alpha=}")
-                solver = NewMethodSolver(
-                    alpha=alpha,
+
+            if args.try_quantized:
+                if len(args.alphas) != 1:
+                    parser.error(
+                        f"When [--try-quantized] is used, 1 alpha value is expected, instead {len(args.alphas)} was given"
+                    )
+                run_quant_model(
+                    alpha=args.alphas[0],
                     size_prefix=args.size_prefix,
                     size_postfix=args.size_postfix,
+                    iteration=args.iterations,
                 )
-                RO = solver.solve(
-                    num_of_iterations=args.iterations,
-                    markov_chain=args.markov_chain,
-                    quant=args.quant,
-                )
-                print(f"{100 * alpha}% => {round(100 * RO / SLOTS_PER_EPOCH, 5)}%")
+            else:
+                for alpha in args.alphas:
+                    print(f"Theoretical calculations for {alpha=}")
+                    solver = NewMethodSolver(
+                        alpha=alpha,
+                        size_prefix=args.size_prefix,
+                        size_postfix=args.size_postfix,
+                    )
+                    RO = solver.solve(
+                        num_of_iterations=args.iterations,
+                        markov_chain=args.markov_chain,
+                        quant=args.quant,
+                    )
+                    print(f"{100 * alpha}% => {round(100 * RO / SLOTS_PER_EPOCH, 5)}%")
         else:
             selfish_mixing(
                 alphas=args.alphas, iterations=args.iterations, heur_max=args.heur_max

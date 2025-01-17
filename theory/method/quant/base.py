@@ -4,7 +4,8 @@ from dataclasses import dataclass
 import numpy as np
 
 from base.helpers import SLOTS_PER_EPOCH
-from theory.method.detailed_distribution import Outcome
+from theory.method.detailed_distribution import DetailedSlot, Outcome
+from theory.method.engine import BeaconChainAction
 
 
 @dataclass
@@ -149,13 +150,29 @@ class RANDAODataProvider(ABC):
     @abstractmethod
     def _provide(self, cfg: int, **kwargs) -> tuple[int, str]:
         """
+        Args:
+            cfg (int): number encoding CANONICAL/NONCANONICAL values with 1/0 digits.
+            The least significant bit corresponds to the first character of the attack
+            string (or eas). Exactly len(attack_string.split(".")[0]) must be considered.
+            In practice an actual RANDAO value can be computed from it.
         Returns:
             tuple[int, str]: The first element is the adversarial slots in epoch E+2
-            for the given attacker, the second one is the epoch string
+            for the given attacker, the second one is the epoch string. For example
+            (12, "ha#aahaa") is returned if epoch e+2 looks like this: haaahhah...aahaa
+            The epoch string needs to be truncated by size_prefix and size_postfix.
+            Additionally, the string before "#" can only contain at most one "a" characters,
+            ("", "a", "ha" ... "hh...ha")
         """
 
-    def feed_subres(self, cfg: int) -> None:
-        pass
+    def feed_result(self, cfg: int) -> None:
+        """
+        Feedback for the agent about the final config (cfg) of the attack.
+        """
+
+    def feed_actions(self, actions: list[BeaconChainAction]) -> None:
+        """
+        Feedback to the agent about the recommended move according to the quantized model.
+        """
 
     def provide(self, cfg: int) -> tuple[int, str]:
         if cfg not in self.provided:

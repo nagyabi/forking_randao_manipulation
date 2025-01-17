@@ -48,18 +48,18 @@ def max_detailed(
     return result
 
 
-class Move(str, Enum):
-    HIDEBLOCK = "HIDEBLOCK"
-    MISSBLOCK = "MISSBLOCK"
-    PROPOSEBLOCK = "PROPOSEBLOCK"
-    FORKOUT = "FORKOUT"
+class DetailedStatus(str, Enum):
+    PRIVATE = "PRIVATE"
+    MISSED = "MISSED"
+    PROPOSED = "PROPOSED"
+    REORGED = "REORGED"
     HONESTPROPOSE = "HONESTPROPOSE"
 
 
 @dataclass(frozen=True)
-class Action:
+class DetailedSlot:
     slot: int
-    move: Move
+    status: DetailedStatus
 
 
 @dataclass(frozen=True)
@@ -70,17 +70,19 @@ class Outcome:
     sacrifice: int
     known: bool
     regret: bool
-    relevant_actions: tuple[Action, ...]
+    det_slot_statuses: tuple[DetailedSlot, ...]
 
     def from_dict(dct: dict) -> "Outcome":
-        actions: list[Action] = []
-        for act_raw in dct["relevant_actions"]:
-            actions.append(Action(**act_raw))
+        det_slots: list[DetailedSlot] = []
+        for status_raw in dct["det_slot_statuses"]:
+            det_slots.append(DetailedSlot(**status_raw))
         load = dict(dct)
-        load["relevant_actions"] = tuple(actions)
+        load["det_slot_statuses"] = tuple(det_slots)
         return Outcome(**load)
 
-    def __insert(self, before: bool, push: int, sac: int, action: Action) -> "Outcome":
+    def __insert(
+        self, before: bool, push: int, sac: int, det_status: DetailedSlot
+    ) -> "Outcome":
         assert before or self.config == 0, f"{self.config=}"
         return Outcome(
             config=push + 2 * self.config if before else 0,
@@ -89,25 +91,25 @@ class Outcome:
             sacrifice=sac + self.sacrifice,
             known=self.known,
             regret=self.regret,
-            relevant_actions=tuple([action, *self.relevant_actions]),
+            det_slot_statuses=tuple([det_status, *self.det_slot_statuses]),
         )
 
-    def insert_canonical(self, before: bool, action: Action) -> "Outcome":
+    def insert_canonical(self, before: bool, det_status: DetailedSlot) -> "Outcome":
         return self.__insert(
             before=before,
             push=1,
             sac=0,
-            action=action,
+            det_status=det_status,
         )
 
     def insert_noncanonical(
-        self, before: bool, is_adv_slot: bool, action: Action
+        self, before: bool, is_adv_slot: bool, det_status: DetailedSlot
     ) -> "Outcome":
         return self.__insert(
             before=before,
             push=0,
             sac=int(is_adv_slot),
-            action=action,
+            det_status=det_status,
         )
 
 
@@ -183,13 +185,15 @@ class DetailedDistribution:
         old_id_to_new_config = {
             id: outcome.insert_canonical(
                 before=self.slot <= 0,
-                action=(
-                    Action(slot=self.slot - 1, move=Move.HIDEBLOCK)
+                det_status=(
+                    DetailedSlot(slot=self.slot - 1, status=DetailedStatus.PRIVATE)
                     if hide
                     else (
-                        Action(slot=self.slot - 1, move=Move.PROPOSEBLOCK)
+                        DetailedSlot(slot=self.slot - 1, status=DetailedStatus.PROPOSED)
                         if is_adv_slot
-                        else Action(slot=self.slot - 1, move=Move.HONESTPROPOSE)
+                        else DetailedSlot(
+                            slot=self.slot - 1, status=DetailedStatus.HONESTPROPOSE
+                        )
                     )
                 ),
             )
@@ -202,10 +206,10 @@ class DetailedDistribution:
             id: outcome.insert_noncanonical(
                 before=self.slot < 0,
                 is_adv_slot=is_adv_slot,
-                action=(
-                    Action(slot=self.slot - 1, move=Move.MISSBLOCK)
+                det_status=(
+                    DetailedSlot(slot=self.slot - 1, status=DetailedStatus.MISSED)
                     if is_adv_slot
-                    else Action(slot=self.slot - 1, move=Move.FORKOUT)
+                    else DetailedSlot(slot=self.slot - 1, status=DetailedStatus.REORGED)
                 ),
             )
             for id, outcome in self.id_to_outcome.items()
@@ -244,7 +248,7 @@ class DetailedDistribution:
                         sacrifice=outcome.sacrifice,
                         known=False,
                         regret=False,
-                        relevant_actions=outcome.relevant_actions,
+                        det_slot_statuses=outcome.det_slot_statuses,
                     )
                     for id, outcome in self.id_to_outcome.items()
                 }
@@ -408,7 +412,7 @@ class DetailedDistribution:
                         sacrifice=outcome.sacrifice,
                         known=outcome.known,
                         regret=regret,
-                        relevant_actions=outcome.relevant_actions,
+                        det_slot_statuses=outcome.det_slot_statuses,
                     )
                     for id, outcome in self.id_to_outcome.items()
                 }
