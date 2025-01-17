@@ -77,6 +77,7 @@ def money_left_when_proposed(
         eas_to_quantized_eas=eas_to_quant,
         mapping_by_eas_postf=mapping_by_eas_postf,
         eas_mapping=eas_mapping,
+        alpha=alpha,
     )
     alternatives: dict[int, EpochAlternatives]
     with open("data/processed_data/alternatives.pkl", "rb") as f:

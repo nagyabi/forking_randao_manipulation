@@ -80,6 +80,15 @@ python3 -m main --statistics --size-postfix <PREFIX_SIZE> --size-prefix <POSTFIX
 
 For computing the theoretical results, use:
 ```bash
-python3 -m main --theory --size-prefix <PREFIX_SIZE> --size-postfix <POSTFIX_SIZE> --alphas <ALPHAS> [--markov-chain] [--quant]
+python3 -m main --theory --size-prefix <PREFIX_SIZE> --size-postfix <POSTFIX_SIZE> --iterations <ITERATIONS> --alphas <ALPHAS> [--markov-chain] [--quant]
 ```
-where you can give <ALPHAS> as a single number or a sequence like ``0.01:0.3:0.02`` (start:stop:step).
+where you can give <ALPHAS> as a single float between 0 and 1 or a sequence like ``0.01:0.3:0.02`` (start:stop:step).
+
+Try the model in different attacking scenarios described by an extended attack string. First, a quantized model is needed, run the above command with the ``--quant`` flag, then run:
+```bash
+python3 -m main --theory --size-prefix <PREFIX_SIZE> --size-postfix <POSTFIX_SIZE> --iterations <ITERATIONS> --alphas <ALPHA> --try-quantized
+```
+
+To use the model in a different environment, implement a custom agent, that inherits from ``RANDAODataProvider`` (See [this](./theory/method/quant/base.py) file).
+
+WARNING: We strongly advise against using our implemented attack on the Ethereum Mainnet.

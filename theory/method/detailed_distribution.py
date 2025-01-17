@@ -53,12 +53,12 @@ class DetailedStatus(str, Enum):
     MISSED = "MISSED"
     PROPOSED = "PROPOSED"
     REORGED = "REORGED"
-
+    HONESTPROPOSE = "HONESTPROPOSE"
 
 @dataclass(frozen=True)
 class DetailedSlot:
     slot: int
-    move: DetailedStatus
+    status: DetailedStatus
 
 
 @dataclass(frozen=True)
@@ -183,9 +183,13 @@ class DetailedDistribution:
             id: outcome.insert_canonical(
                 before=self.slot <= 0,
                 det_status=(
-                    DetailedSlot(slot=self.slot - 1, move=DetailedStatus.PRIVATE)
+                    DetailedSlot(slot=self.slot - 1, status=DetailedStatus.PRIVATE)
                     if hide
-                    else DetailedSlot(slot=self.slot - 1, move=DetailedStatus.PROPOSED)
+                    else (
+                        DetailedSlot(slot=self.slot - 1, status=DetailedStatus.PROPOSED)
+                        if is_adv_slot
+                        else DetailedSlot(slot=self.slot - 1, status=DetailedStatus.HONESTPROPOSE)
+                    )
                 ),
             )
             for id, outcome in self.id_to_outcome.items()
@@ -198,9 +202,9 @@ class DetailedDistribution:
                 before=self.slot < 0,
                 is_adv_slot=is_adv_slot,
                 det_status=(
-                    DetailedSlot(slot=self.slot - 1, move=DetailedStatus.MISSED)
+                    DetailedSlot(slot=self.slot - 1, status=DetailedStatus.MISSED)
                     if is_adv_slot
-                    else DetailedSlot(slot=self.slot - 1, move=DetailedStatus.REORGED)
+                    else DetailedSlot(slot=self.slot - 1, status=DetailedStatus.REORGED)
                 ),
             )
             for id, outcome in self.id_to_outcome.items()
