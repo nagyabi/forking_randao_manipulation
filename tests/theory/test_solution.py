@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from base.helpers import sac
-from theory.method.detailed_distribution import Action, Move
+from theory.method.detailed_distribution import DetailedSlot, DetailedStatus
 from theory.method.distribution import RichValuedDistribution
 from theory.method.quant.base import (
     RandomRANDAODataProvider,
@@ -51,7 +51,7 @@ def extract_stats(adv_slots: int, before: str, cfg: int) -> np.ndarray:
     return result
 
 
-def check_actions(actions: list[Action], before: str, cfg: int):
+def check_actions(actions: list[DetailedSlot], before: str, cfg: int):
     assert len(actions) == len(before), f"{actions=} {before=}"
     for i, (c, adv_char, action) in enumerate(
         zip(bin(cfg)[2:].zfill(len(before))[::-1], before, actions)
@@ -59,14 +59,14 @@ def check_actions(actions: list[Action], before: str, cfg: int):
         assert action.slot == -len(before) + i
         if c == "0":
             if adv_char == "h":
-                assert action.move == Move.FORKOUT
+                assert action.move == DetailedStatus.REORGED
             else:
-                assert action.move == Move.MISSBLOCK
+                assert action.move == DetailedStatus.MISSED
         else:
             if adv_char == "h":
-                assert action.move == Move.HONESTPROPOSE
+                assert action.move == DetailedStatus.PROPOSED
             else:
-                assert action.move in [Move.PROPOSEBLOCK, Move.HIDEBLOCK]
+                assert action.move in [DetailedStatus.PROPOSED, DetailedStatus.PRIVATE]
 
 
 arguments = [

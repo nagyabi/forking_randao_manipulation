@@ -1,5 +1,5 @@
 from typing import Optional
-from theory.method.detailed_distribution import Action
+from theory.method.detailed_distribution import DetailedSlot
 from theory.method.quant.base import QuantizedEAS, RANDAODataProvider
 
 
@@ -31,7 +31,7 @@ class QuantizedModelRunner:
             list[int]: list of configs that the attacker can calculate the RANDAO, this the (adv_slots, epoch_string).
             These should be the keys in the feed method.
         """
-        self.captured_actions: list[Action] = []
+        self.captured_actions: list[DetailedSlot] = []
         self.config: int = 0
         self.head: int = 1
         self.eas = self.eas_mapping[eas]
@@ -42,7 +42,7 @@ class QuantizedModelRunner:
         self.prev_res: Optional[int] = None
         return self.required
 
-    def consume(self, id_to_epoch: dict[int, tuple[int, str]]) -> tuple[int, bool]:
+    def consume(self, id_to_epoch: dict[int, tuple[int, str]]) -> tuple[int, bool, list[DetailedSlot]]:
         assert set(id_to_epoch) == set(
             self.required
         ), f"{set(id_to_epoch)=} {set(self.required)=}"
@@ -69,24 +69,30 @@ class QuantizedModelRunner:
                 future_ids = [id for id in future_ids if id not in self.id_to_epoch]
 
                 self.required = future_ids
+                slot = -len(self.eas.split(".")[0])
+                end_slot = quantized_eas.id_to_outcome[best_id].end_slot
+                assert end_slot > slot
+                actions = quantized_eas.id_to_outcome[best_id].det_slot_statuses
+                actions = [action for action in actions if slot <= action.slot < end_slot]
+                self.captured_actions.extend(
+                    quantized_eas.id_to_outcome[best_id].det_slot_statuses
+                )
                 if len(future_ids) == 0:
                     assert quantized_eas.id_to_outcome[best_id].end_slot >= 0
                     assert (
                         0 <= best_id < 2 ** len(self.eas.split(".")[0])
                     ), f"{best_id=} {self.eas=}"
                     self.config += self.head * best_id
-                    self.captured_actions.extend(
-                        quantized_eas.id_to_outcome[best_id].relevant_actions
-                    )
+                    
                     slots = [action.slot for action in self.captured_actions]
                     assert len(slots) == len(
                         set(slots)
                     ), f"{self.eas=} {self.captured_actions=}"
                     self.prev_res = self.config
-                    return self.config, False
+                    return self.config, False, actions
 
                 self.prev_res = self.config + self.head * best_id
-                return self.prev_res, True
+                return self.prev_res, True, actions
             else:
                 slot = -len(self.eas.split(".")[0])
                 end_slot = quantized_eas.id_to_outcome[best_id].end_slot
@@ -95,11 +101,11 @@ class QuantizedModelRunner:
                 self.config += self.head * (best_id % (2 ** (end_slot - slot)))
 
                 self.head *= 2 ** (end_slot - slot)
-                self.captured_actions.extend(
-                    action
-                    for action in quantized_eas.id_to_outcome[best_id].relevant_actions
+                actions = [
+                    action for action in quantized_eas.id_to_outcome[best_id].det_slot_statuses
                     if slot <= action.slot < end_slot
-                )
+                ]
+                self.captured_actions.extend(actions)
 
                 prev = prev[end_slot - slot :]
                 self.eas = self.eas_mapping[f"{prev}.{rest}"]
@@ -115,7 +121,7 @@ class QuantizedModelRunner:
                     id for id in self.required if id not in self.id_to_epoch
                 ]
 
-                return self.prev_res, bool(self.required)
+                return self.prev_res, bool(self.required), actions
         else:
             assert (
                 self.prev_res % self.head == self.config
@@ -131,11 +137,12 @@ class QuantizedModelRunner:
             assert end_slot > slot
             self.config += self.head * (best_id % (2 ** (end_slot - slot)))
             self.head *= 2 ** (end_slot - slot)
-            self.captured_actions.extend(
+            actions = [
                 action
-                for action in quantized_eas.id_to_outcome[best_id].relevant_actions
+                for action in quantized_eas.id_to_outcome[best_id].det_slot_statuses
                 if slot <= action.slot < end_slot
-            )
+            ]
+            self.captured_actions.extend(actions)
 
             prev = prev[end_slot - slot :]
             self.eas = self.eas_mapping[f"{prev}.{rest}"]
@@ -146,10 +153,10 @@ class QuantizedModelRunner:
             if self.eas in self.eas_to_quantized_eas:
                 self.required = []
                 self.before = True
-                return self.prev_res, True
+                return self.prev_res, True, actions
 
             else:
-                return self.prev_res, False
+                return self.prev_res, False, actions
 
     def run_one_epoch(self, eas: str, provider: RANDAODataProvider) -> int:
         """
@@ -170,10 +177,10 @@ class QuantizedModelRunner:
                     cfg not in provider.provided
                 ), f"{eas=} {cfg=} {provider.provided=}"
                 new_info[cfg] = provider.provide(cfg)
-            best_cfg, more = self.consume(id_to_epoch=new_info)
+            best_cfg, more, actions = self.consume(id_to_epoch=new_info)
             if not more:
                 break
 
-            provider.feed_subres(best_cfg)
-        provider.feed_subres(best_cfg)
+            provider.feed_actions(actions=actions)
+        provider.feed_result(best_cfg)
         return best_cfg

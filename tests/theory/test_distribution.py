@@ -81,7 +81,7 @@ dist1_det = DetailedDistribution(
                 sacrifice=1,
                 known=True,
                 regret=False,
-                relevant_actions=(),
+                det_slot_statuses=(),
             )
         }
     ),
@@ -147,7 +147,7 @@ dist2_det = DetailedDistribution(
                 sacrifice=2,
                 known=True,
                 regret=False,
-                relevant_actions=(),
+                det_slot_statuses=(),
             )
         }
     ),

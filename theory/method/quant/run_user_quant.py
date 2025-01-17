@@ -1,5 +1,6 @@
 import numpy as np
 from theory.method.cache import Cacher
+from theory.method.detailed_distribution import DetailedSlot
 from theory.method.quant.base import RANDAODataProvider
 from theory.method.quant.runner import QuantizedModelRunner
 
@@ -42,10 +43,13 @@ class UserRANDAOProvider(RANDAODataProvider):
                 pass
         return (adv_slots, epoch_string)
 
-    def feed_subres(self, cfg: int) -> None:
+    def feed_result(self, cfg: int) -> None:
         print("(SUB)RES:")
         self.prettyp_cfg(cfg)
         print()
+    
+    def feed_actions(self, actions: list[DetailedSlot]):
+        print(f"{actions=}")
 
 
 def run_quant_model(
@@ -71,8 +75,8 @@ def run_quant_model(
 
 if __name__ == "__main__":
     run_quant_model(
-        alpha=np.float64(0.271),
+        alpha=np.float64(0.281),
         size_prefix=2,
         size_postfix=6,
-        iteration=0,
+        iteration=10,
     )

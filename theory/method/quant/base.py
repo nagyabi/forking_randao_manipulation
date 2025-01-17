@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from base.helpers import SLOTS_PER_EPOCH
-from theory.method.detailed_distribution import Outcome
+from theory.method.detailed_distribution import DetailedSlot, Outcome
 
 
 @dataclass
@@ -154,7 +154,10 @@ class RANDAODataProvider(ABC):
             for the given attacker, the second one is the epoch string
         """
 
-    def feed_subres(self, cfg: int) -> None:
+    def feed_result(self, cfg: int) -> None:
+        pass
+
+    def feed_actions(self, actions: list[DetailedSlot]) -> None:
         pass
 
     def provide(self, cfg: int) -> tuple[int, str]:

@@ -841,7 +841,7 @@ class DetailedDistributionMaker(MakerBase, DistributionMaker[DetailedDistributio
                         sacrifice=0,
                         known=True,
                         regret=False,
-                        relevant_actions=(),
+                        det_slot_statuses=(),
                     )
                 }
             ),
