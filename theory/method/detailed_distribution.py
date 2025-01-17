@@ -55,6 +55,7 @@ class DetailedStatus(str, Enum):
     REORGED = "REORGED"
     HONESTPROPOSE = "HONESTPROPOSE"
 
+
 @dataclass(frozen=True)
 class DetailedSlot:
     slot: int
@@ -79,7 +80,9 @@ class Outcome:
         load["det_slot_statuses"] = tuple(det_slots)
         return Outcome(**load)
 
-    def __insert(self, before: bool, push: int, sac: int, det_status: DetailedSlot) -> "Outcome":
+    def __insert(
+        self, before: bool, push: int, sac: int, det_status: DetailedSlot
+    ) -> "Outcome":
         assert before or self.config == 0, f"{self.config=}"
         return Outcome(
             config=push + 2 * self.config if before else 0,
@@ -188,7 +191,9 @@ class DetailedDistribution:
                     else (
                         DetailedSlot(slot=self.slot - 1, status=DetailedStatus.PROPOSED)
                         if is_adv_slot
-                        else DetailedSlot(slot=self.slot - 1, status=DetailedStatus.HONESTPROPOSE)
+                        else DetailedSlot(
+                            slot=self.slot - 1, status=DetailedStatus.HONESTPROPOSE
+                        )
                     )
                 ),
             )

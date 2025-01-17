@@ -66,7 +66,10 @@ def check_statuses(actions: list[DetailedSlot], before: str, cfg: int):
             if adv_char == "h":
                 assert action.status == DetailedStatus.HONESTPROPOSE
             else:
-                assert action.status in [DetailedStatus.PROPOSED, DetailedStatus.PRIVATE]
+                assert action.status in [
+                    DetailedStatus.PROPOSED,
+                    DetailedStatus.PRIVATE,
+                ]
 
 
 arguments = [

@@ -90,3 +90,9 @@ python3 -m main --theory --size-prefix <PREFIX_SIZE> --size-postfix <POSTFIX_SIZ
 ```
 
 To use the model in a different environment, implement a custom agent, that inherits from ``RANDAODataProvider`` (See [this](./theory/method/quant/base.py) file).
+
+**Testing**
+
+```bash
+python3 -m pytest tests/
+```

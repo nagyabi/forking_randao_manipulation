@@ -47,7 +47,9 @@ class QuantizedModelRunner:
         self.finish_fork_statuses: list[DetailedSlot] = []
         return self.required
 
-    def consume(self, id_to_epoch: dict[int, tuple[int, str]]) -> tuple[int, bool, list[BeaconChainAction]]:
+    def consume(
+        self, id_to_epoch: dict[int, tuple[int, str]]
+    ) -> tuple[int, bool, list[BeaconChainAction]]:
         assert set(id_to_epoch) == set(
             self.required
         ), f"{set(id_to_epoch)=} {set(self.required)=}"
@@ -74,7 +76,7 @@ class QuantizedModelRunner:
                 future_ids = [id for id in future_ids if id not in self.id_to_epoch]
 
                 self.required = future_ids
-                
+
                 if len(future_ids) == 0:
                     assert quantized_eas.id_to_outcome[best_id].end_slot >= 0
                     assert (
@@ -89,7 +91,9 @@ class QuantizedModelRunner:
                         set(slots)
                     ), f"{self.eas=} {self.captured_statuses=}"
                     self.prev_res = self.config
-                    actions = self.engine.feed(quantized_eas.id_to_outcome[best_id].det_slot_statuses)
+                    actions = self.engine.feed(
+                        quantized_eas.id_to_outcome[best_id].det_slot_statuses
+                    )
                     return self.config, False, actions
 
                 self.prev_res = self.config + self.head * best_id
@@ -102,8 +106,16 @@ class QuantizedModelRunner:
 
                 assert last_reorged is not None
                 end_slot = quantized_eas.id_to_outcome[best_id].end_slot
-                self.finish_fork_statuses = [status for status in quantized_eas.id_to_outcome[best_id].det_slot_statuses if last_reorged.slot < status.slot < end_slot]
-                fork_statuses_before = [status for status in quantized_eas.id_to_outcome[best_id].det_slot_statuses if status.slot <= last_reorged.slot]
+                self.finish_fork_statuses = [
+                    status
+                    for status in quantized_eas.id_to_outcome[best_id].det_slot_statuses
+                    if last_reorged.slot < status.slot < end_slot
+                ]
+                fork_statuses_before = [
+                    status
+                    for status in quantized_eas.id_to_outcome[best_id].det_slot_statuses
+                    if status.slot <= last_reorged.slot
+                ]
                 actions = self.engine.feed(fork_statuses_before)
                 return self.prev_res, True, actions
             else:
@@ -115,7 +127,10 @@ class QuantizedModelRunner:
 
                 self.head *= 2 ** (end_slot - slot)
                 statuses = [
-                    slot_status for slot_status in quantized_eas.id_to_outcome[best_id].det_slot_statuses
+                    slot_status
+                    for slot_status in quantized_eas.id_to_outcome[
+                        best_id
+                    ].det_slot_statuses
                     if slot <= slot_status.slot < end_slot
                 ]
                 self.captured_statuses.extend(statuses)
@@ -145,7 +160,7 @@ class QuantizedModelRunner:
             )
             actions: list[BeaconChainAction] = []
             best_id_adj = self.config + self.head * best_id
-            if best_id_adj == self.prev_res: # Finish forking
+            if best_id_adj == self.prev_res:  # Finish forking
                 actions = self.engine.feed(self.finish_fork_statuses)
             else:
                 self.engine.regret()
@@ -158,7 +173,9 @@ class QuantizedModelRunner:
             self.head *= 2 ** (end_slot - slot)
             statuses = [
                 slot_status
-                for slot_status in quantized_eas.id_to_outcome[best_id].det_slot_statuses
+                for slot_status in quantized_eas.id_to_outcome[
+                    best_id
+                ].det_slot_statuses
                 if slot <= slot_status.slot < end_slot
             ]
             self.captured_statuses.extend(statuses)
@@ -168,13 +185,17 @@ class QuantizedModelRunner:
                 statuses: list[DetailedSlot] = []
                 for i, attack_ch in enumerate(rest.split("#")[0]):
                     if attack_ch == "h":
-                        statuses.append(DetailedSlot(slot=i, status=DetailedStatus.HONESTPROPOSE))
+                        statuses.append(
+                            DetailedSlot(slot=i, status=DetailedStatus.HONESTPROPOSE)
+                        )
                     elif attack_ch == "a":
-                        statuses.append(DetailedSlot(slot=i, status=DetailedStatus.PROPOSED))
+                        statuses.append(
+                            DetailedSlot(slot=i, status=DetailedStatus.PROPOSED)
+                        )
                 actions_after = self.engine.feed(statuses)
                 actions.extend(actions_after)
             self.eas = self.eas_mapping[f"{prev}.{rest}"]
-            
+
             assert (self.eas in self.eas_to_quantized_eas) == (
                 prev != ""
             ), f"{self.eas=} {prev=} {self.eas_to_quantized_eas=}"
@@ -208,6 +229,5 @@ class QuantizedModelRunner:
             best_cfg, more, actions = self.consume(id_to_epoch=new_info)
             provider.feed_actions(actions=actions)
 
-            
         provider.feed_result(best_cfg)
         return best_cfg

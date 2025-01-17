@@ -33,7 +33,7 @@ class Cacher:
         size_postfix: int,
         default: dict[str, np.float64],
         base_folder: str = CACHE_FOLDER,
-        should_exists: bool = False
+        should_exists: bool = False,
     ):
         folder_name = cache_path(
             alpha=alpha, size_prefix=size_prefix, size_postfix=size_postfix
@@ -42,7 +42,9 @@ class Cacher:
             base_folder = CACHE_FOLDER
         self.folder_name = os.path.join(base_folder, folder_name)
         if should_exists:
-            assert os.path.exists(self.folder_name), f"No cache corresponds to {alpha=} {size_prefix=} {size_postfix=}"
+            assert os.path.exists(
+                self.folder_name
+            ), f"No cache corresponds to {alpha=} {size_prefix=} {size_postfix=}"
         self.default = default
         self.quant_serializer = QuantizedEASSerializer()
 

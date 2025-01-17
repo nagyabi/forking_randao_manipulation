@@ -208,7 +208,10 @@ def main():
         help="A single float or a comma-separated list of floats which represents the stakes",
     )
     parser.add_argument(
-        "--heur-max", type=int, default=SLOTS_PER_EPOCH, help="Maximum of tail slot in selfish mixing theory",
+        "--heur-max",
+        type=int,
+        default=SLOTS_PER_EPOCH,
+        help="Maximum of tail slot in selfish mixing theory",
     )
     parser.add_argument(
         "--iterations",
@@ -374,10 +377,12 @@ def main():
         if args.alphas is None:
             parser.error("--alphas is required when choosing --theory")
         if not args.selfish_mixing:
-            
+
             if args.try_quantized:
                 if len(args.alphas) != 1:
-                    parser.error(f"When [--try-quantized] is used, 1 alpha value is expected, instead {len(args.alphas)} was given")
+                    parser.error(
+                        f"When [--try-quantized] is used, 1 alpha value is expected, instead {len(args.alphas)} was given"
+                    )
                 run_quant_model(
                     alpha=args.alphas[0],
                     size_prefix=args.size_prefix,

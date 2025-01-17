@@ -45,16 +45,16 @@ class UserRANDAOProvider(RANDAODataProvider):
                 assert epoch_string.count("#") <= 1
                 if epoch_string.count("#") == 1:
                     before, after = epoch_string.split("#")
-                    before = before[:self.size_prefix]
-                    after = after[-self.size_postfix:]
+                    before = before[: self.size_prefix]
+                    after = after[-self.size_postfix :]
                 else:
                     assert len(epoch_string) == SLOTS_PER_EPOCH
-                    before = epoch_string[:self.size_prefix]
-                    after = epoch_string[-self.size_postfix:]
+                    before = epoch_string[: self.size_prefix]
+                    after = epoch_string[-self.size_postfix :]
                 if before.count("a") == 0:
                     before = ""
                 else:
-                    before = before[:before.find("a")+1]
+                    before = before[: before.find("a") + 1]
                 epoch_string = f"{before}#{after}"
                 print(f"{epoch_string=}")
                 break
@@ -69,13 +69,13 @@ class UserRANDAOProvider(RANDAODataProvider):
         print("=================")
         print()
         print()
-    
+
     def feed_actions(self, actions: list[BeaconChainAction]) -> None:
         def slot_and_epoch(slot: int) -> str:
             epoch = "e" if slot < 0 else "e+1"
             slot %= SLOTS_PER_EPOCH
             return f"epoch: {epoch}; slot: {slot}"
-        
+
         print()
         for action in actions:
             act_str: str
@@ -91,7 +91,11 @@ def run_quant_model(
     alpha: np.float64, size_prefix: int, size_postfix: int, iteration: int
 ):
     cacher = Cacher(
-        alpha=alpha, size_prefix=size_prefix, size_postfix=size_postfix, default=None, should_exists=True
+        alpha=alpha,
+        size_prefix=size_prefix,
+        size_postfix=size_postfix,
+        default=None,
+        should_exists=True,
     )
     eas_mapping, eas_to_quant, mapping_by_eas_postf = cacher.get_quant(
         iteration=iteration
@@ -105,13 +109,17 @@ def run_quant_model(
         eas_mapping=eas_mapping,
         alpha=alpha,
     )
-    print("Please provide an extended attack string (eas, e.g. \"aha.a#aa\") excluding ones starting with \".\" as they do not provide a manipulating opportunity.")
+    print(
+        'Please provide an extended attack string (eas, e.g. "aha.a#aa") excluding ones starting with "." as they do not provide a manipulating opportunity.'
+    )
     print()
     while True:
         eas = input("eas: ")
         mapped = eas_mapping[eas]
         print(f"{eas} => {mapped}")
-        provider = UserRANDAOProvider(eas=eas, size_prefix=size_prefix, size_postfix=size_postfix)
+        provider = UserRANDAOProvider(
+            eas=eas, size_prefix=size_prefix, size_postfix=size_postfix
+        )
         runner.run_one_epoch(eas=eas, provider=provider)
 
 

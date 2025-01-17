@@ -167,7 +167,9 @@ class DetailedEvaluator(Generic[T_Detailed_Distribution]):
 
                 addit_to_dist[addit] = dist
 
-            before = eas.attack_string.postfix_prev.postfix[adv_cluster1 + honest_cluster:]
+            before = eas.attack_string.postfix_prev.postfix[
+                adv_cluster1 + honest_cluster :
+            ]
             no_fork_string = f"{before}.{eas.attack_string.prefix_next.prefix}#{eas.postfix_epoch_next.postfix}"
             no_forking_dist = (
                 self.eas_to_dist[no_fork_string]
@@ -299,7 +301,7 @@ class DetailedEvaluator(Generic[T_Detailed_Distribution]):
                         ].expected_value_in_distribution()
                     gc.collect()  # Forcing garbage collection /each unique postfixes
                     batch = set()
-                    
+
                 pfix = eas.postfix_epoch_next.postfix
                 self.eas_to_dist[str(eas)] = self.eval_eas(eas=eas)
                 batch.add(str(eas))
