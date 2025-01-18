@@ -56,7 +56,7 @@ class UserRANDAOProvider(RANDAODataProvider):
                 else:
                     before = before[: before.find("a") + 1]
                 epoch_string = f"{before}#{after}"
-                print(f"{epoch_string=}")
+                
                 break
             except AssertionError:
                 pass
