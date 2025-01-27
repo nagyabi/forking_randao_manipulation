@@ -5,6 +5,7 @@ from theory.method.cache import Cacher
 from theory.method.detailed_distribution import DetailedDistribution
 from theory.method.detailed_eval import DetailedEvaluator
 from theory.method.distribution import (
+    ApproximatedDistributionMaker,
     DetailedDistributionMaker,
     RichDistributionMaker,
     RichValuedDistribution,
@@ -68,11 +69,12 @@ class NewMethodSolver:
             attack_string_mapping=attack_string_mapping,
             postfix_mapping=calc_postfix_mapping(attack_string_mapping),
         )
-        self.maker = ValuedDistributionMaker(
+        self.maker = ApproximatedDistributionMaker(
             alpha=alpha,
             size_prefix=size_prefix,
             size_postfix=size_postfix,
             eas_mapping=self.eas_mapping,
+            memory_size=5,
         )
         self.rich_maker = RichDistributionMaker(
             alpha=alpha,

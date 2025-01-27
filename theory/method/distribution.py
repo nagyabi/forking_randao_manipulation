@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from collections import defaultdict
 from copy import deepcopy
 from dataclasses import dataclass
 from types import MappingProxyType
@@ -236,6 +237,43 @@ class ValuedDistribution:
 
         return ValuedDistribution(distribution=new_distribution)
 
+
+@dataclass(frozen=True)
+class ApproximatedDistribution:
+    distribution: np.ndarray
+
+    def expected_value(self) -> np.float64:
+        return np.average(self.distribution)
+    
+    def expected_value_in_distribution(self) -> "ApproximatedDistribution":
+        exp_val = self.expected_value()
+        return ApproximatedDistribution(np.array([exp_val for _ in self.distribution], dtype=np.float64))
+    
+    def increase_sacrifice(self, sacrifice: int) -> "ApproximatedDistribution":
+        return ApproximatedDistribution(distribution=self.distribution - sacrifice)
+    
+    def max(self, other: "ApproximatedDistribution") -> "ApproximatedDistribution":
+        array1 = np.repeat(self.distribution[:, np.newaxis], len(other.distribution), axis=1)
+        array2 = np.repeat(other.distribution[np.newaxis, :], len(self.distribution), axis=0)
+        try:
+            max_array = np.maximum(array1, array2)
+        except Exception as e:
+
+            print(f"{array1.shape=} {array2.shape=}")
+            print(f"{array1=}")
+            print(f"{array2=}")
+            print()
+            raise e
+        sorted_array = np.sort(max_array.flatten())
+        array = sorted_array.reshape((len(other.distribution), len(self.distribution)))
+        return ApproximatedDistribution(np.average(array, axis=0))
+    
+    def max_unknown(self, unknown: "ApproximatedDistribution") -> "ApproximatedDistribution":
+        array1 = np.repeat(self.distribution[:, np.newaxis], len(unknown.distribution), axis=1)
+        array2 = np.repeat(unknown.distribution[np.newaxis, :], len(self.distribution), axis=0)
+        max_array = np.maximum(array1, array2)
+        array = np.average(max_array, axis=0)
+        return ApproximatedDistribution(distribution=array)
 
 @dataclass
 class RichValuedDistribution:
@@ -659,6 +697,50 @@ class ValuedDistributionMaker(MakerBase, DistMakerBase[ValuedDistribution]):
         distribution = [value_to_element[key] for key in sorted(list(value_to_element))]
 
         return ValuedDistribution(distribution=distribution)
+
+class ApproximatedDistributionMaker(MakerBase, DistMakerBase[ApproximatedDistribution]):
+    def __init__(
+        self,
+        alpha: np.float64,
+        size_prefix: int,
+        size_postfix: int,
+        eas_mapping: dict[str, str],
+        memory_size: int,
+    ) -> None:
+        super().__init__(alpha, size_prefix, size_postfix, eas_mapping)
+        self.memory_size = memory_size
+    
+    def make_distribution(self, value_function: dict[str, np.float64], postfix_next_epoch: EpochPostfix) -> ApproximatedDistribution:
+        value_to_probability: dict[float, float] = defaultdict(float)
+        for epoch_string, elements in self.epoch_string_to_chances.items():
+            next_eas_repr = self.eas_mapping[f"{postfix_next_epoch}.{epoch_string}"]
+            for element in elements:
+                value = element.value + value_function[next_eas_repr]
+                value_to_probability[value] += element.probability
+        
+        sorted_value_to_probability = sorted(value_to_probability.items(), key=lambda x: x[0])
+        result: list[float] = []
+        cluster: list[float] = []
+        acc_prob = 0
+        chunk = 1 / self.memory_size
+        for value, prob in sorted_value_to_probability:
+            while acc_prob + prob >= chunk:
+                assert acc_prob <= chunk, f"{acc_prob=} {chunk=}"
+                rest = acc_prob + prob - chunk
+                cluster.append(value * (prob - rest))
+                result.append(sum(cluster) * self.memory_size)
+                cluster = []
+                acc_prob = 0
+                prob = rest
+            acc_prob += prob
+            cluster.append(prob * value)
+
+        assert abs(len(result) - self.memory_size) <= 1
+        if len(result) < self.memory_size:
+            assert len(cluster) > 0
+            result.append(sum(cluster) * self.memory_size)
+        assert len(result) == self.memory_size
+        return ApproximatedDistribution(np.array(result, dtype=np.float64))
 
 
 class RichDistributionMaker(MakerBase, DistMakerBase[RichValuedDistribution]):

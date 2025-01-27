@@ -23,7 +23,7 @@ BIG_ENTITIES = [
     "CoinSpot",
 ]
 LATEST_DELIVERY = "data/processed_data/2024_10_02_delivery/cases.csv"
-CACHE_FOLDER = "cache"
+CACHE_FOLDER = "cache3"
 FIGURES_FOLDER = "Figures"
 
 
