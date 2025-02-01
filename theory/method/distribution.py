@@ -272,7 +272,7 @@ class ApproximatedDistribution:
         array1 = np.repeat(self.distribution[:, np.newaxis], len(unknown.distribution), axis=1)
         array2 = np.repeat(unknown.distribution[np.newaxis, :], len(self.distribution), axis=0)
         max_array = np.maximum(array1, array2)
-        array = np.average(max_array, axis=0)
+        array = np.average(max_array, axis=1)
         return ApproximatedDistribution(distribution=array)
 
 @dataclass
@@ -740,7 +740,9 @@ class ApproximatedDistributionMaker(MakerBase, DistMakerBase[ApproximatedDistrib
             assert len(cluster) > 0
             result.append(sum(cluster) * self.memory_size)
         assert len(result) == self.memory_size
-        return ApproximatedDistribution(np.array(result, dtype=np.float64))
+        array = np.array(result, dtype=np.float64)
+        assert np.isclose(np.average(array), sum(value * prob for value, prob in sorted_value_to_probability))
+        return ApproximatedDistribution(array)
 
 
 class RichDistributionMaker(MakerBase, DistMakerBase[RichValuedDistribution]):

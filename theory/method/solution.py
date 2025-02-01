@@ -74,7 +74,7 @@ class NewMethodSolver:
             size_prefix=size_prefix,
             size_postfix=size_postfix,
             eas_mapping=self.eas_mapping,
-            memory_size=5,
+            memory_size=65,
         )
         self.rich_maker = RichDistributionMaker(
             alpha=alpha,
