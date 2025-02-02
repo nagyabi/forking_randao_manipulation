@@ -255,15 +255,9 @@ class ApproximatedDistribution:
     def max(self, other: "ApproximatedDistribution") -> "ApproximatedDistribution":
         array1 = np.repeat(self.distribution[:, np.newaxis], len(other.distribution), axis=1)
         array2 = np.repeat(other.distribution[np.newaxis, :], len(self.distribution), axis=0)
-        try:
-            max_array = np.maximum(array1, array2)
-        except Exception as e:
 
-            print(f"{array1.shape=} {array2.shape=}")
-            print(f"{array1=}")
-            print(f"{array2=}")
-            print()
-            raise e
+        max_array = np.maximum(array1, array2)
+
         sorted_array = np.sort(max_array.flatten())
         array = sorted_array.reshape((len(other.distribution), len(self.distribution)))
         return ApproximatedDistribution(np.average(array, axis=0))
