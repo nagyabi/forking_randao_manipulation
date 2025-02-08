@@ -260,7 +260,7 @@ class ApproximatedDistribution:
 
         sorted_array = np.sort(max_array.flatten())
         array = sorted_array.reshape((len(other.distribution), len(self.distribution)))
-        return ApproximatedDistribution(np.average(array, axis=0))
+        return ApproximatedDistribution(np.average(array, axis=1))
     
     def max_unknown(self, unknown: "ApproximatedDistribution") -> "ApproximatedDistribution":
         array1 = np.repeat(self.distribution[:, np.newaxis], len(unknown.distribution), axis=1)
