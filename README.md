@@ -40,12 +40,16 @@ python3 -m main --config-api-keys etherscan --action append --key-values <YourAP
 ```
 
 For scraping beaconscan.com:
-1. Visit [beaconscan.com](https://beaconscan.com/)
-2. In a new tab open Chrome console (F12)
-3. Visit [beaconscan.com/validators](https://beaconscan.com/validators)
-4. Copy the header of the request not including keys starting with ``:``
-5. Make beaconscan.header in this [folder](./data/internet/headers/), and paste the header.
-6. Test the header with ``python3 -m main --data test-scrape``
+1. Visit [beaconscan.com/validators](https://beaconscan.com/validators)
+2. Open Chrome console (F12 or Right-Click and Inspect)
+3. Click on the sorting arrow next to `INDEX`
+4. Navigate to the Network tab, and choose the request starting with `datasource?q=validators`
+5. The url we are looking for must start with `https://beaconscan.com/datasource?q=validators&type=total&networkId=&sid=<YourSessionID>&draw=`. Copy your session id to a new file named `sid.txt` in this [folder](./data/internet/headers/)
+6. Copy the Response Headers starting from `Accept:`
+7. Make `beaconscan.header` in to the same [folder](./data/internet/headers/), and paste the header.
+8. Test the header with ``python3 -m main --data test-scrape``
+
+There is no guarantee scraping wont broke eventually. If it used to work for you but your header and session id is old, you can try repeating the above process.
 
 For your entity mapping, insert to:
 Paste it into [entities.json](./data/jsons/entities.json)
