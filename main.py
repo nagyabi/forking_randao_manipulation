@@ -332,12 +332,12 @@ def main():
             service_to_is_online = scrape_test()
             print_test_results(service_to_is_online)
             headers_path_to_link = {
-                "data/internet/headers/beaconscan.header": "https://beaconscan.com/slot/8530623",
+                "data/internet/headers/beaconscan.header": "https://beaconscan.com/validators",
+                "data/internet/headers/sid.txt": "https://beaconscan.com/validators",
             }
             for header_path, link in headers_path_to_link.items():
                 if not os.path.exists(header_path):
-                    print(f"Warning: No header file in {header_path}")
-                    print(f"Copy the correct header by visiting this link: {link}")
+                    print(f"Warning: No header file/session id in {header_path}. Copy the correct information by visiting this link: {link}")
         elif args.data == "beaconchain":
             if args.max_epoch is None:
                 parser.error("--max-epoch is required when choosing --data beaconchain")
