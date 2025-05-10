@@ -1,8 +1,16 @@
-This is the official repository for the paper [Forking the RANDAO: Manipulating Ethereum’s Distributed Randomness Beacon](https://eprint.iacr.org/2025/037.pdf). It includes theoretical evaluations of forking RANDAO manipulations and tools for searching anomalies on Ethereum mainnet.
+This is the official repository for the paper [Forking the RANDAO: Manipulating Ethereum’s Distributed Randomness Beacon](https://eprint.iacr.org/2025/037.pdf). It includes theoretical evaluations of forking RANDAO manipulations and tools for identifying anomalies on Ethereum mainnet.
 
 1. Collecting beaconchain information from the internet (https://etherscan.io/, https://beaconscan.com/, https://beaconcha.in/)
 2. Processing collected data looking for potential anomalies (RANDAO manipulations).
 3. Evaluating effects forking attacks (theoretical calculations) with applied heuristics. Providing model which outputs ``best`` actions for the adversary (simulating and testing purposes). We do not advise you on using this model for financial gains.
+
+🚨 Already collected data available until 2025.05.02! If you're only interested in analyzing potential manipulation events, you can skip the data collection phase entirely. Download the full datasets in CSV format from [Google Drive](https://drive.google.com/drive/folders/1uuYVHHhBIOjuCm3qIGdx4rmWUBbL8FeP?usp=sharing), pre-processed and ready to explore. Further release notes in the shared folder.
+
+Note that these CSV files are not compatible with the internal data processing tools in this repo, which use JSON and pickle formats. They're designed to be lightweight and easy to parse so you can analyze the data however you like.
+
+If the data or tools in this repo help your work, consider starring the project ⭐ to support future research.
+
+Good hunting. 🎯
 
 **Environment**
 
