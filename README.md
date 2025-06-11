@@ -59,7 +59,7 @@ For scraping beaconscan.com:
 
 There is no guarantee scraping wont broke eventually. If it used to work for you but your header and session id is old, you can try repeating the above process.
 
-For your entity mapping, insert to ((or use ours from [Google Drive](https://drive.google.com/drive/folders/1uuYVHHhBIOjuCm3qIGdx4rmWUBbL8FeP?usp=sharing))): [entities.json](./data/jsons/entities.json)
+For your entity mapping, insert to (or use ours from [Google Drive](https://drive.google.com/drive/folders/1uuYVHHhBIOjuCm3qIGdx4rmWUBbL8FeP?usp=sharing)): [entities.json](./data/jsons/entities.json)
 in the format of address: entity name
 ```json
 {
