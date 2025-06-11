@@ -9,8 +9,11 @@ import numpy as np
 import seaborn as sns
 from scipy.stats import norm
 from base.helpers import SLOTS_PER_EPOCH
-from tikzplotlib import save as tikz_save
 
+try:
+    from tikzplotlib import save as tikz_save
+except ImportError:
+    tikz_save = None
 
 STK_X_LABEL = r"Stakes ($\alpha$)"
 
@@ -62,7 +65,7 @@ def plot_4_distributions_vs_normal(
     plt.tight_layout(rect=[0, 0, 1, 0.95])
     if to_filename:
         plt.savefig(to_filename, bbox_inches="tight")
-    if tkz_filename:
+    if tkz_filename and tikz_save is not None:
         tikz_save(
             tkz_filename,
             encoding="utf8",
@@ -236,7 +239,7 @@ def plot_cumulative_distribution(
     plt.title(title)
     plt.legend(loc="best")
     plt.grid(True)
-    if tkz_filename:
+    if tkz_filename and tikz_save is not None:
         tikz_save(
             tkz_filename,
             encoding="utf8",
@@ -301,7 +304,7 @@ def plot_data(
     ax1.legend(loc="upper left", handlelength=4)
     if to_filename:
         plt.savefig(to_filename)
-    if tkz_filename:
+    if tkz_filename and tikz_save is not None:
         tikz_save(
             tkz_filename,
             encoding="utf8",

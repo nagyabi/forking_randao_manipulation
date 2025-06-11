@@ -10,7 +10,10 @@ import matplotlib.patches as mpatches
 from base.helpers import FIGURES_FOLDER, SLOTS_PER_EPOCH, Status
 from data.file_manager import FileManager
 
-from tikzplotlib import save as tikz_save
+try:
+    from tikzplotlib import save as tikz_save
+except ImportError:
+    tikz_save = None
 
 YELLOW = (0.96, 0.96, 0.76)
 PURPLE = (0.1, 0.413, 0.56)
@@ -159,7 +162,7 @@ def plot_triangular_grid(
     plt.tight_layout()
     if to_filename:
         plt.savefig(to_filename)
-    if tkz_filename:
+    if tkz_filename and tikz_save is not None:
         tikz_save(
             tkz_filename,
             encoding="utf8",

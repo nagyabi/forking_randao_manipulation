@@ -7,8 +7,10 @@ import pandas as pd
 from base.helpers import CACHE_FOLDER, FIGURES_FOLDER
 from make_figures.base import STK_X_LABEL, cache_mapping, eas_map
 import seaborn as sns
-from tikzplotlib import save as tikz_save
-
+try:
+    from tikzplotlib import save as tikz_save
+except ImportError:
+    tikz_save = None
 
 def extract_heatmap_values(
     size_prefix: int, size_postfix: int, iteration: int
@@ -42,14 +44,16 @@ def plot_heatmap(data):
     plt.tight_layout(pad=2.0)
     plt.savefig(os.path.join(FIGURES_FOLDER, "utility_heatmap.png"))
     tkz_filename = os.path.join(FIGURES_FOLDER, "utility_heatmap.tex")
-    tikz_save(
-        tkz_filename,
-        encoding="utf8",
-        axis_height="55mm",
-        axis_width="8cm",
-        strict=False,
-        extra_axis_parameters=["font=\small"],
-    )
+    
+    if tikz_save is not None:
+        tikz_save(
+            tkz_filename,
+            encoding="utf8",
+            axis_height="55mm",
+            axis_width="8cm",
+            strict=False,
+            extra_axis_parameters=["font=\small"],
+        )
 
 
 if __name__ == "__main__":

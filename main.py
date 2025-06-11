@@ -216,7 +216,7 @@ def main():
     parser.add_argument(
         "--iterations",
         type=int,
-        default=10,
+        default=25,
         help="A single integer of how much iteration will be used for finetuning the value function",
     )
     parser.add_argument(

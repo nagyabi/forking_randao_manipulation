@@ -4,8 +4,10 @@ from matplotlib import pyplot as plt
 import numpy as np
 from base.helpers import CACHE_FOLDER, FIGURES_FOLDER, SLOTS_PER_EPOCH
 from make_figures.base import STK_X_LABEL, cache_mapping, extract_infos
-from tikzplotlib import save as tikz_save
-
+try:
+    from tikzplotlib import save as tikz_save
+except ImportError:
+    tikz_save = None
 
 def plot_chain_quality2(size_prefix: int, size_postfix: int, iterations: int):
     mapping = cache_mapping(
@@ -51,14 +53,15 @@ def plot_chain_quality2(size_prefix: int, size_postfix: int, iterations: int):
     plt.tight_layout()
     plt.savefig(os.path.join(FIGURES_FOLDER, "chain_quality_layered.png"))
     tkz_filename = os.path.join(FIGURES_FOLDER, "chain_quality_layered.tex")
-    tikz_save(
-        tkz_filename,
-        encoding="utf8",
-        axis_height="55mm",
-        axis_width="8cm",
-        strict=False,
-        extra_axis_parameters=["font=\small"],
-    )
+    if tikz_save is not None:
+        tikz_save(
+            tkz_filename,
+            encoding="utf8",
+            axis_height="55mm",
+            axis_width="8cm",
+            strict=False,
+            extra_axis_parameters=["font=\small"],
+        )
 
 
 if __name__ == "__main__":

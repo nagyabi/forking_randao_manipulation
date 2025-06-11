@@ -11,8 +11,11 @@ from data.hypothesis.proposed import (
     observed_vs_expected_interpol,
 )
 from make_figures.base import HistogramCfg, plot_4_distributions_vs_normal
-from tikzplotlib import save as tikz_save
 
+try:
+    from tikzplotlib import save as tikz_save
+except ImportError:
+    tikz_save = None
 
 @dataclass
 class BarCfg:
@@ -65,7 +68,7 @@ def plot_4_distributions_vs_expected(
     plt.tight_layout(rect=[0, 0, 1, 0.95])
     if to_filename:
         plt.savefig(to_filename, bbox_inches="tight")
-    if tkz_filename:
+    if tkz_filename and tikz_save is not None:
         tikz_save(
             tkz_filename,
             encoding="utf8",

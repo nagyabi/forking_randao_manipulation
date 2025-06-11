@@ -10,7 +10,11 @@ from data.process.serialize import ReorgEntrySerializer
 from scipy.stats import linregress
 import matplotlib.patches as mpatches
 from scipy.stats import pearsonr
-from tikzplotlib import save as tikz_save
+
+try:
+    from tikzplotlib import save as tikz_save
+except:
+    tikz_save = None
 
 
 def collect_after_reward_data() -> list[tuple[str, float, float]]:
@@ -74,7 +78,7 @@ def plot_MEV_RO(
     # Show the plot
     if to_filename:
         plt.savefig(to_filename)
-    if tkz_filename:
+    if tkz_filename and tikz_save is not None:
         tikz_save(
             tkz_filename,
             encoding="utf8",

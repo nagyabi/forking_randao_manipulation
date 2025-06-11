@@ -8,9 +8,15 @@ dumps/
 cache/
 cache2/
 cache3/
-Figures/
 selfish_mixing/
 logs/
 venv/
 .venv/
 *.har
+*.bin
+*.csv
+*.out
+*.ipynb
+*.settings.json
+fast_alternatives/
+settings.json
