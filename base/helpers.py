@@ -22,7 +22,7 @@ BIG_ENTITIES = [
     "Revolut",
     "CoinSpot",
 ]
-LATEST_DELIVERY = "data/processed_data/2024_10_02_delivery/cases.csv"
+LATEST_DELIVERY = "data/processed_data/delivery/2025_04_30_delivery/cases.csv"
 CACHE_FOLDER = "cache"
 FIGURES_FOLDER = "Figures"
 
