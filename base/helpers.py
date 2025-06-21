@@ -108,7 +108,8 @@ def read_headers(filename: str) -> dict[str, str]:
         return {}
     with open(filename, "r") as f:
         lines = f.readlines()
-    keys = [line[:-2] for line in lines[::2]]
+    keys = [line.strip() for line in lines[::2]]
+    keys = [key[:-1] if key.endswith(":") else key for key in keys]
     vals = [line[:-1] if line[-1] == "\n" else line for line in lines[1::2]]
     return {key: val for key, val in zip(keys, vals)}
 

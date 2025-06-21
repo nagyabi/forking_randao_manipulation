@@ -186,6 +186,12 @@ def main():
         action="store_true",
         help="Collecting validators will start where it crashed/stopped",
     )
+    # Scrape test
+    parser.add_argument(
+        "--reraise",
+        action="store_true",
+        help="Whether reraise excepction",
+    )
 
     # Markov chain & Statistics & Alternatives
 
@@ -329,7 +335,7 @@ def main():
 
     elif args.data:
         if args.data == "test-scrape":
-            service_to_is_online = scrape_test()
+            service_to_is_online = scrape_test(args.reraise)
             print_test_results(service_to_is_online)
             headers_path_to_link = {
                 "data/internet/headers/beaconscan.header": "https://beaconscan.com/validators",
@@ -337,7 +343,9 @@ def main():
             }
             for header_path, link in headers_path_to_link.items():
                 if not os.path.exists(header_path):
-                    print(f"Warning: No header file/session id in {header_path}. Copy the correct information by visiting this link: {link}")
+                    print(
+                        f"Warning: No header file/session id in {header_path}. Copy the correct information by visiting this link: {link}"
+                    )
         elif args.data == "beaconchain":
             if args.max_epoch is None:
                 parser.error("--max-epoch is required when choosing --data beaconchain")
