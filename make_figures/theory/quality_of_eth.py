@@ -4,10 +4,12 @@ from matplotlib import pyplot as plt
 import numpy as np
 from base.helpers import CACHE_FOLDER, FIGURES_FOLDER, SLOTS_PER_EPOCH
 from make_figures.base import STK_X_LABEL, cache_mapping, extract_infos
+
 try:
     from tikzplotlib import save as tikz_save
 except ImportError:
     tikz_save = None
+
 
 def plot_chain_quality2(size_prefix: int, size_postfix: int, iterations: int):
     mapping = cache_mapping(

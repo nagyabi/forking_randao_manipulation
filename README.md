@@ -37,7 +37,7 @@ Good hunting
 
 **Collecting data**
 
-Get API keys here:
+Get API keys here (free plan is enough):
 * https://beaconcha.in/pricing
 * https://etherscan.io/apis#pricing-plan
 
@@ -46,6 +46,7 @@ Add them with the following command:
 python3 -m main --config-api-keys beaconcha --action append --key-values <YourAPIKey> --test-values
 python3 -m main --config-api-keys etherscan --action append --key-values <YourAPIKey> --test-values
 ```
+You can add multiple API keys for etherscan.io
 
 For scraping beaconscan.com:
 1. Visit [beaconscan.com/validators](https://beaconscan.com/validators)
@@ -53,24 +54,27 @@ For scraping beaconscan.com:
 3. Click on the sorting arrow next to `INDEX`
 4. Navigate to the Network tab, and choose the request starting with `datasource?q=validators`
 5. The url we are looking for must start with `https://beaconscan.com/datasource?q=validators&type=total&networkId=&sid=<YourSessionID>&draw=`. Copy your session id to a new file named `sid.txt` in this [folder](./data/internet/headers/)
-6. Copy the Response Headers starting from `Accept:`
-7. Make `beaconscan.header` in to the same [folder](./data/internet/headers/), and paste the header.
-8. Test the header with ``python3 -m main --data test-scrape``
+6. Scroll down and copy the Response Headers starting from `Accept`
+![Example image](./request_headers.png)
+7. Make `beaconscan.header` into the same [folder](./data/internet/headers/), and paste the header.
+![Example image](./header_sample.png)
+8. Test the header with ``python3 -m main --data test-scrape [--reraise]``. If you get the status `EXCEPCTION_OCCURED`, your header is expired/invalid.
 
 There is no guarantee scraping wont broke eventually. If it used to work for you but your header and session id is old, you can try repeating the above process.
 
-For your entity mapping, insert to (or use ours from [Google Drive](https://drive.google.com/drive/folders/1uuYVHHhBIOjuCm3qIGdx4rmWUBbL8FeP?usp=sharing)): [entities.json](./data/jsons/entities.json)
-in the format of address: entity name
+For your address -> entity mapping, insert to (or use ours from [Google Drive](https://drive.google.com/drive/folders/1uuYVHHhBIOjuCm3qIGdx4rmWUBbL8FeP?usp=sharing)): [data/jsons/entities.json](./data/jsons/)
+in the format of "address": "entity name"
 ```json
 {
    "0xfddf38947afb03c621c71b06c9c70bce73f12999": "Lido",
    ...
 }
 ```
+The next command will use this to compute index -> entity mapping which will be used later in the statistics calculation
 
 Start grabbing data with:
 ```bash
-python3 -m main --data --full
+python3 -m main --data full
 ```
 
 (Optional) Verify BLS signatures (RANDAO reveals) with
@@ -87,7 +91,7 @@ python3 -m data.process.mev_grinder
 **Data Delivery**
 
 When delivering data, we applied cutting heuristics and only regard a certain region of epoch.
-size_prefix and size_postfix parameters sets how much information we keep during a delivery (recommended 2, 8 respectively). The ``alternatives computation`` is time consuming, but can be stopped with C-c and continued later.
+size_prefix and size_postfix parameters sets how much information we keep during a delivery (recommended 2, 8 respectively). The ``alternatives computation`` is time consuming (can take days), but can be stopped with C-c and continued later.
 ```bash
 python3 -m main --alternatives --size-postfix <PREFIX_SIZE> --size-prefix <POSTFIX_SIZE>
 python3 -m main --statistics --size-postfix <PREFIX_SIZE> --size-prefix <POSTFIX_SIZE> --export-folder <DELIVERY_PATH>

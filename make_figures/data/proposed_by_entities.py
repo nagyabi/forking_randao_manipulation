@@ -17,6 +17,7 @@ try:
 except ImportError:
     tikz_save = None
 
+
 @dataclass
 class BarCfg:
     indexed: list[tuple[tuple[int, int], int]]

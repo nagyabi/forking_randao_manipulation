@@ -1,12 +1,20 @@
+from enum import Enum
+from typing import Any, Callable
 from base.beaconchain import BlockData, Validator
-from base.helpers import DEFAULT, GREEN, MISSING, RED, Status
+from base.helpers import DEFAULT, GREEN, MISSING, ORANGE, RED, Status
 import data.internet
 
 import data.internet.connection
 import data.internet.beaconscan.scrape
 
 
-def scrape_test() -> dict[str, bool]:
+class ScrapeResult(Enum):
+    MATCHING = "MATCHING"
+    NOT_MATCHING = "NOT_MATCHING"
+    EXCEPCTION_OCCURED = "EXCEPCTION_OCCURED"
+
+
+def scrape_test(reraise: bool) -> dict[str, tuple[ScrapeResult, str]]:
     """
     Testing connection to websites and correctness of scraping functions
 
@@ -122,28 +130,61 @@ def scrape_test() -> dict[str, bool]:
             ),
         },
     ]
-    result: dict[str, int] = {}
-    for (name, func, arg), expec in zip(functions_with_args, expected):
+    compare_functions: list[Callable[[Any, Any], bool]] = [
+        lambda a, b: a == b,
+        lambda a, b: all(
+            [
+                v.index == b[k].index
+                and v.public_key == b[k].public_key
+                and v.start_slot == b[k].start_slot
+                for k, v in a.items()
+            ]
+        ),
+    ]
+    result: dict[str, ScrapeResult] = {}
+    for (name, func, arg), expec, compare in zip(
+        functions_with_args, expected, compare_functions
+    ):
         try:
             actual = func(*arg)
-        except Exception:
-            actual = None
-        result[name] = actual == expec
+        except Exception as e:
+            result[name] = (
+                ScrapeResult.EXCEPCTION_OCCURED,
+                f" - Exception: {repr(e)} - Rerun with --reraise to get stackstrace of the first exception",
+            )
+            if reraise:
+                raise e
+            continue
+        result[name] = (
+            (ScrapeResult.MATCHING, "")
+            if compare(actual, expec)
+            else (
+                ScrapeResult.NOT_MATCHING,
+                f"\n{actual=}\n==============\nexpected={expec=}\n",
+            )
+        )
+
     return result
 
 
 def print_test_results(
-    service_to_online_dict: dict[str, bool], should_upper: bool = True
+    service_to_online_dict: dict[str, tuple[ScrapeResult, str] | bool],
+    should_upper: bool = True,
 ):
-    for name, is_online in service_to_online_dict.items():
-        service_status = "ONLINE" if is_online else "OFFLINE"
-        color = GREEN if service_status == "ONLINE" else RED
-        if should_upper:
-            print(f"{name.upper()}: {color}{service_status}{DEFAULT}")
+    for name, result in service_to_online_dict.items():
+        if isinstance(result, bool):
+            color = GREEN if result else RED
+            service_status = "ONLINE" if result else "OFFLINE"
+            message = ""
         else:
-            print(f"{name}: {color}{service_status}{DEFAULT}")
+            status, message = result
+            color = (
+                GREEN
+                if status == ScrapeResult.MATCHING
+                else ORANGE if status == ScrapeResult.NOT_MATCHING else RED
+            )
+            service_status = status.value
+        if should_upper:
+            name = name.upper()
 
-
-if __name__ == "__main__":
-    service_to_is_online = scrape_test()
-    print_test_results(service_to_is_online)
+        print(f"{name}: {color}{service_status}{DEFAULT}{message}")
