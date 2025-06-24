@@ -53,10 +53,10 @@ For scraping beaconscan.com:
 2. Open Chrome console (F12 or Right-Click and Inspect)
 3. Click on the sorting arrow next to `INDEX`
 4. Navigate to the Network tab, and choose the request starting with `datasource?q=validators`
-5. The url we are looking for must start with `https://beaconscan.com/datasource?q=validators&type=total&networkId=&sid=<YourSessionID>&draw=`. Copy your session id to a new file named `sid.txt` in this [folder](./data/internet/headers/)
+5. The url we are looking for must start with `https://beaconscan.com/datasource?q=validators&type=total&networkId=&sid=<YourSessionID>&draw=`. Copy your session id to a new file named `sid.txt` in [data/internet/headers/](./data/internet/headers/)
 6. Scroll down and copy the Response Headers starting from `Accept`
 ![Example image](./request_headers.png)
-7. Make `beaconscan.header` into the same [folder](./data/internet/headers/), and paste the header.
+7. Paste the content into `beaconscan.header` in [/data/internet/headers/](./data/internet/headers/)
 ![Example image](./header_sample.png)
 8. Test the header with ``python3 -m main --data test-scrape [--reraise]``. If you get the status `EXCEPCTION_OCCURED`, your header is expired/invalid.
 
