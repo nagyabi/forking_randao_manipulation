@@ -88,7 +88,14 @@ class Evaluator(Generic[T_Distribution]):
             index += 1
             honest_cluster += 1
         adv_cluster2 = 0
-        while index < len(extracted) and extracted[index] == "a":
+        while (
+            index < len(extracted)
+            and extracted[index] == "a"
+            and self.known.get(
+                f"{eas.attack_string.postfix_prev.postfix[index + 1:]}.{eas.attack_string.prefix_next}",
+                False,
+            )
+        ):
             index += 1
             adv_cluster2 += 1
 
