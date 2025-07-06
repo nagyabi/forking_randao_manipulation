@@ -90,10 +90,18 @@ python3 -m data.process.mev_grinder
 
 **Data Delivery**
 
+⚠️⚠️ The new logic of Pectra fork is NOT integrated, the ``alternatives`` computation will not work for epochs after the fork (`364032`) ⚠️⚠️
+
 When delivering data, we applied cutting heuristics and only regard a certain region of epoch.
 size_prefix and size_postfix parameters sets how much information we keep during a delivery (recommended 2, 8 respectively). The ``alternatives computation`` is time consuming (can take days), but can be stopped with C-c and continued later.
 ```bash
 python3 -m main --alternatives --size-postfix <PREFIX_SIZE> --size-prefix <POSTFIX_SIZE>
+```
+This calculation will crash due to the differences between actual
+and calculated validators in epochs close to the end of your dataset. It is completely normal, the computations are saved regardless of the exception.
+
+
+```bash
 python3 -m main --statistics --size-postfix <PREFIX_SIZE> --size-prefix <POSTFIX_SIZE> --export-folder <DELIVERY_PATH>
 ```
 
@@ -104,6 +112,7 @@ For computing the theoretical results, use:
 python3 -m main --theory --size-prefix <PREFIX_SIZE> --size-postfix <POSTFIX_SIZE> --iterations <ITERATIONS> --alphas <ALPHAS> [--markov-chain] [--quant]
 ```
 where you can give <ALPHAS> as a single float between 0 and 1 or a sequence like ``0.01:0.3:0.02`` (start:stop:step).
+Try to to avoid `round` percentages such as `0.2` as it can lead to numerical instabilities during forking. Instead add a small number to it: `0.2000000001`.
 Similarly, for baselining the plots later with the `only selfish mixing` strategy, use:
 ```bash
 python3 -m main --theory --selfish-mixing --alphas <ALPHAS>
