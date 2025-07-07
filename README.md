@@ -130,24 +130,30 @@ To use the model in a different environment, implement a custom agent, that inhe
 For this section you will either need processed data (delivery) or theoretical calculations.
 Note that in the article we used tikz, but the library the repository is using is not working in every environment.
 
+(*): Plots marked like this require theoretical calculations with iteration=25. The value is hard coded, feel free to rewrite it in the source file.
+
 Figure 6:
 `cache` folder stores the utility functions like this (`cache/alpha=0_281-size_prefix=2-size_postfix=6/expected_values.json`)
 ```json
 {"10": {"RO": 9.744380362449885, ...}}
 ```
 
-Figure 7:
+Figure 7 (*):
 ```bash
 python3 -m make_figures.theory.expected_values
 ```
-Figure 8:
+Figure 8 (*) (eprint: Figure 12):
+```bash
+python3 -m make_figures.theory.quality_of_eth
+```
+Figure 9 (*) (eprint: Figure 8):
 ```bash
 python3 -m make_figures.theory.probabilities
 ```
 Table 2:
 cache
 
-Figure 9:
+Figure 10 (eprint: Figure 9):
 ```bash
 python3 -m make_figures.data.missed_heatmap
 ```
@@ -155,7 +161,7 @@ Table 3:
 ```bash
 python3 -m make_figures.data.bnw_by_entities
 ```
-Figure 10:
+Figure 11 (eprint: Figure 10):
 ```bash
 python3 -m make_figures.data.proposed_by_entities
 ```
@@ -167,14 +173,11 @@ Table 5:
 ```bash
 python3 -m data.hypothesis.missed
 ```
-Figure 11:
+Figure 12 (eprint: Figure 11):
 ```bash
 python3 -m make_figures.theory.one_shot
 ```
-Figure 12:
-```bash
-python3 -m make_figures.theory.quality_of_eth
-```
+
 Figure 13:
 ```bash
 python3 -m make_figures.data.mev_and_normalized_RO
